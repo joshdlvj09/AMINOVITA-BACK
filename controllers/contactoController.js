@@ -1,9 +1,6 @@
 const nodemailer = require('nodemailer');
 
-// 1. Cargamos las variables de entorno (por seguridad)
-// Si ya tienes require('dotenv').config() en tu server.js, esta línea es opcional,
-// pero dejarla aquí no hace daño y asegura que funcione si pruebas este archivo solo.
-require('dotenv').config(); 
+require('dotenv').config();
 
 exports.enviarCorreo = async (req, res) => {
     // Recibimos los datos del formulario
@@ -11,22 +8,24 @@ exports.enviarCorreo = async (req, res) => {
 
     try {
         // 2. Configuración del Transporte
-        // Aquí es donde leemos los datos "secretos" del archivo .env
+        // Usamos SMTP explícito con el puerto 587 para evitar el bloqueo de puertos en Render
         const transporter = nodemailer.createTransport({
-            service: 'gmail', // Al poner esto, Node sabe que debe usar smtp.gmail.com y el puerto 465 automáticamente
+            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.EMAIL_PORT) || 587,
+            secure: process.env.EMAIL_SECURE === 'true' ? true : false,
             auth: {
-                user: process.env.EMAIL_USER, // Leemos joshdlvj09@gmail.com del .env
-                pass: process.env.EMAIL_PASS  // Leemos la contraseña de aplicación del .env
-            }
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            },
+            connectionTimeout: 10000, // 10 segundos
+            greetingTimeout: 10000
         });
 
         // 3. Configuración del Email
         const mailOptions = {
-            from: `"Aminovita Web" <${process.env.EMAIL_USER}>`, 
-            to: process.env.EMAIL_USER, // Se envía a ti mismo (al dueño)
-            
-            replyTo: email, // El truco: Al responder, le respondes al cliente
-            
+            from: `"Aminovita Web" <${process.env.EMAIL_USER}>`,
+            to: process.env.EMAIL_USER, // Se envía a ti mismo
+            replyTo: email, // Al responder, le respondes al cliente
             subject: `Nuevo Mensaje de: ${nombre}`,
             html: `
                 <h3>Tienes un nuevo prospecto</h3>
