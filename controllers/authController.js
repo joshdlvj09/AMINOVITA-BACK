@@ -10,6 +10,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
+// Helper para crear un transporte SMTP compatible con Render y Local
+const crearTransporter = () => {
+    return nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.EMAIL_PORT) || 587,
+        secure: process.env.EMAIL_SECURE === 'true' ? true : false,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000
+    });
+};
+
 // =======================================================
 // 1. ENVIAR CÓDIGO DE VERIFICACIÓN (REGISTRO)
 // =======================================================
@@ -32,11 +47,8 @@ exports.enviarCodigoRegistro = async (req, res) => {
         const nuevaVerificacion = new Verification({ email, code: codigo });
         await nuevaVerificacion.save();
 
-        // Enviar Correo
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-        });
+        // Enviar Correo con transporte SMTP
+        const transporter = crearTransporter();
 
         await transporter.sendMail({
             from: `"Seguridad Aminovita" <${process.env.EMAIL_USER}>`,
@@ -171,13 +183,11 @@ exports.olvidePassword = async (req, res) => {
         const secret = (process.env.JWT_SECRET || 'secreto') + usuario.password;
         const token = jwt.sign({ id: usuario._id, email: usuario.email }, secret, { expiresIn: '10m' });
 
-        // 👇 IMPORTANTE: Asegúrate de que este puerto (5500) es donde corre tu FRONTEND (Live Server)
-        const link = `http://127.0.0.1:4000/reset.html?id=${usuario._id}&token=${token}`;
+        // URL adaptada para Netlify o dominio de producción
+        const frontendURL = process.env.FRONTEND_URL || 'https://aminovita.netlify.app';
+        const link = `${frontendURL}/html/reset.html?id=${usuario._id}&token=${token}`;
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-        });
+        const transporter = crearTransporter();
 
         await transporter.sendMail({
             from: `"Soporte Aminovita" <${process.env.EMAIL_USER}>`,
@@ -253,24 +263,21 @@ exports.toggleFavorito = async (req, res) => {
 };
 
 // =======================================================
-// 7. OBTENER FAVORITOS (CORREGIDO PARA EVITAR ERROR 500)
+// 7. OBTENER FAVORITOS
 // =======================================================
 exports.obtenerFavoritos = async (req, res) => {
     try {
-        // Buscamos al usuario usando el ID inyectado por el token JWT
         const user = await User.findById(req.usuario.id);
         
         if (!user) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
 
-        // 🛠️ CORRECCIÓN: Vinculamos explícitamente la referencia al modelo cargado 'Product'
         await user.populate({
             path: 'favoritos',
             model: Product
         });
 
-        // Aseguramos responder con una lista limpia si no hay datos guardados aún
         const misFavoritos = user.favoritos || [];
         res.json(misFavoritos); 
 
