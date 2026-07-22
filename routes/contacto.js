@@ -15,8 +15,8 @@ router.post('/', async (req, res) => {
     // Mapeo de IDs del frontend hacia los correos correspondientes
     const CONTACTOS_VALIDOS = {
         contacto1: 'ventas1@aminovitaquimicos.com.mx',
-        contacto2: 'direccion@aminovitaquimicos.com.mx',
-        contacto3: 'ventas3@aminovitaquimicos.com.mx'
+        contacto2: 'ventas3@aminovitaquimicos.com.mx',
+        contacto3: 'direccion@aminovitaquimicos.com.mx'
     };
 
     const correoDestino = CONTACTOS_VALIDOS[destinatarioId] || 'direccion@aminovitaquimicos.com.mx';
