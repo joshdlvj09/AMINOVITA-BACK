@@ -10,12 +10,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
-// Helper para crear transporte SMTP forzado a STARTTLS (Evita ETIMEDOUT en Render)
+// Helper para crear transporte SMTP con SSL directo (puerto 465) - Alternativa a STARTTLS para evitar ETIMEDOUT en Render
 const crearTransporter = () => {
     return nodemailer.createTransport({
         host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // Forzado a STARTTLS
+        port: 465,
+        secure: true, // SSL directo
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
