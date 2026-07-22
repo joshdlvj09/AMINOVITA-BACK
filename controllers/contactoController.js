@@ -1,30 +1,17 @@
-const nodemailer = require('nodemailer');
-
+const { Resend } = require('resend');
 require('dotenv').config();
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 exports.enviarCorreo = async (req, res) => {
     // Recibimos los datos del formulario
     const { nombre, email, empresa, mensaje } = req.body;
 
     try {
-        // 2. Configuración del Transporte
-        // Usamos SMTP explícito con el puerto 587 para evitar el bloqueo de puertos en Render
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.EMAIL_PORT) || 587,
-            secure: process.env.EMAIL_SECURE === 'true' ? true : false,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            },
-            connectionTimeout: 10000, // 10 segundos
-            greetingTimeout: 10000
-        });
-
-        // 3. Configuración del Email
-        const mailOptions = {
-            from: `"Aminovita Web" <${process.env.EMAIL_USER}>`,
-            to: process.env.EMAIL_USER, // Se envía a ti mismo
+        // Enviar Correo con Resend
+        await resend.emails.send({
+            from: 'Aminovita Web <onboarding@resend.dev>',
+            to: 'sistemas@aminovitaquimicos.com.mx', // Se envía a la bandeja de la empresa
             replyTo: email, // Al responder, le respondes al cliente
             subject: `Nuevo Mensaje de: ${nombre}`,
             html: `
@@ -36,10 +23,8 @@ exports.enviarCorreo = async (req, res) => {
                 <p><strong>Mensaje:</strong></p>
                 <p>${mensaje}</p>
             `
-        };
+        });
 
-        // 4. Enviar
-        await transporter.sendMail(mailOptions);
         res.status(200).json({ msg: '¡Correo enviado con éxito!' });
 
     } catch (error) {
