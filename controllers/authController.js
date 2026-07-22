@@ -168,8 +168,8 @@ exports.olvidePassword = async (req, res) => {
         const secret = (process.env.JWT_SECRET || 'secreto') + usuario.password;
         const token = jwt.sign({ id: usuario._id, email: usuario.email }, secret, { expiresIn: '10m' });
 
-        // URL adaptada para Netlify o dominio de producción
-        const frontendURL = process.env.FRONTEND_URL || 'https://aminovita.netlify.app';
+        // URL del dominio de producción
+        const frontendURL = process.env.FRONTEND_URL || 'https://aminovitaquimicos.com.mx';
         const link = `${frontendURL}/html/reset.html?id=${usuario._id}&token=${token}`;
 
         await resend.emails.send({
