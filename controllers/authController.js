@@ -36,7 +36,7 @@ exports.enviarCodigoRegistro = async (req, res) => {
 
         // Enviar Correo con Resend
         await resend.emails.send({
-            from: 'Seguridad Aminovita <onboarding@resend.dev>',
+            from: 'Seguridad Aminovita <sistemas@aminovitaquimicos.com.mx>',
             to: email,
             subject: '🔐 Tu Código de Verificación',
             html: `
@@ -173,7 +173,7 @@ exports.olvidePassword = async (req, res) => {
         const link = `${frontendURL}/html/reset.html?id=${usuario._id}&token=${token}`;
 
         await resend.emails.send({
-            from: 'Soporte Aminovita <onboarding@resend.dev>',
+            from: 'Soporte Aminovita <sistemas@aminovitaquimicos.com.mx>',
             to: email,
             subject: 'Recuperar Contraseña',
             html: `

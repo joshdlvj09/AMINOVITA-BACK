@@ -10,7 +10,7 @@ exports.enviarCorreo = async (req, res) => {
     try {
         // Enviar Correo con Resend
         await resend.emails.send({
-            from: 'Aminovita Web <onboarding@resend.dev>',
+            from: 'Aminovita Web <sistemas@aminovitaquimicos.com.mx>',
             to: 'sistemas@aminovitaquimicos.com.mx', // Se envía a la bandeja de la empresa
             replyTo: email, // Al responder, le respondes al cliente
             subject: `Nuevo Mensaje de: ${nombre}`,
