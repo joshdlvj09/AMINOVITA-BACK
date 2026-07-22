@@ -12,7 +12,7 @@ exports.enviarCorreo = async (req, res) => {
         await resend.emails.send({
             from: 'Aminovita Web <contacto@aminovitaquimicos.com.mx>',
             to: 'sistemas@aminovitaquimicos.com.mx', // Se envía a la bandeja de la empresa
-            replyTo: email, // Al responder, le respondes al cliente
+            reply_to: email, // Corregido: Resend requiere 'reply_to' (snake_case)
             subject: `Nuevo Mensaje de: ${nombre}`,
             html: `
                 <h3>Tienes un nuevo prospecto</h3>
