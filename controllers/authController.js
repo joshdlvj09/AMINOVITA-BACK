@@ -8,25 +8,9 @@ const Verification = require('../models/Verification');
 const Product = require('../models/product'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Helper para crear transporte SMTP con SSL directo (puerto 465) - Alternativa a STARTTLS para evitar ETIMEDOUT en Render
-const crearTransporter = () => {
-    return nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // SSL directo
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        },
-        tls: {
-            rejectUnauthorized: false // Evita bloqueos por certificados en la red de Render
-        },
-        connectionTimeout: 15000,
-        greetingTimeout: 15000
-    });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // =======================================================
 // 1. ENVIAR CÓDIGO DE VERIFICACIÓN (REGISTRO)
@@ -50,11 +34,9 @@ exports.enviarCodigoRegistro = async (req, res) => {
         const nuevaVerificacion = new Verification({ email, code: codigo });
         await nuevaVerificacion.save();
 
-        // Enviar Correo con transporte SMTP
-        const transporter = crearTransporter();
-
-        await transporter.sendMail({
-            from: `"Seguridad Aminovita" <${process.env.EMAIL_USER}>`,
+        // Enviar Correo con Resend
+        await resend.emails.send({
+            from: 'Seguridad Aminovita <onboarding@resend.dev>',
             to: email,
             subject: '🔐 Tu Código de Verificación',
             html: `
@@ -190,10 +172,8 @@ exports.olvidePassword = async (req, res) => {
         const frontendURL = process.env.FRONTEND_URL || 'https://aminovita.netlify.app';
         const link = `${frontendURL}/html/reset.html?id=${usuario._id}&token=${token}`;
 
-        const transporter = crearTransporter();
-
-        await transporter.sendMail({
-            from: `"Soporte Aminovita" <${process.env.EMAIL_USER}>`,
+        await resend.emails.send({
+            from: 'Soporte Aminovita <onboarding@resend.dev>',
             to: email,
             subject: 'Recuperar Contraseña',
             html: `
