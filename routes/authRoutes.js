@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
+const { loginLimiter, authLimiter } = require('../middleware/rateLimiter');
 
 // Rutas de Registro y Login
-router.post('/register', authController.registrarUsuario);
-router.post('/send-code', authController.enviarCodigoRegistro);
-router.post('/login', authController.iniciarSesion);
+router.post('/register', authLimiter, authController.registrarUsuario);
+router.post('/send-code', authLimiter, authController.enviarCodigoRegistro);
+router.post('/login', loginLimiter, authController.iniciarSesion);
 
 // Rutas de Recuperación de Contraseña
-router.post('/olvide-password', authController.olvidePassword);
-router.post('/nuevo-password', authController.guardarNuevoPassword); // 👈 ESTA ES LA NUEVA RUTA NECESARIA
+router.post('/olvide-password', authLimiter, authController.olvidePassword);
+router.post('/nuevo-password', authLimiter, authController.guardarNuevoPassword);
 
 // Rutas Privadas (Perfil y Favoritos)
 router.get('/perfil', auth, authController.obtenerPerfil);
