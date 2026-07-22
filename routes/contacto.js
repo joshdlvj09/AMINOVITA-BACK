@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Ruta: POST /api/contacto
 router.post('/', async (req, res) => {
@@ -12,19 +14,11 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ msg: "Por favor completa todos los campos obligatorios." });
     }
 
-    // 3. Configurar el Transportador
-    const transporter = nodemailer.createTransport({
-        service: 'gmail', 
-        auth: {
-            user: process.env.EMAIL_USER, 
-            pass: process.env.EMAIL_PASS  
-        }
-    });
-
-    // 4. Diseño del Correo (HTML)
+    // 3. Diseño del Correo (HTML)
     const mailOptions = {
-        from: `"Formulario Aminovita" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER, 
+        from: 'Aminovita Web <contacto@aminovitaquimicos.com.mx>',
+        to: 'sistemas@aminovitaquimicos.com.mx',
+        reply_to: email,
         subject: `📢 Nuevo Mensaje de: ${nombre}`,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
@@ -55,8 +49,8 @@ router.post('/', async (req, res) => {
 
     // 5. Enviar el correo
     try {
-        await transporter.sendMail(mailOptions);
-        console.log("✅ Correo enviado con éxito a:", process.env.EMAIL_USER);
+        await resend.emails.send(mailOptions);
+        console.log("✅ Correo enviado con éxito");
         res.json({ msg: "Mensaje enviado correctamente" });
     } catch (error) {
         console.error("❌ Error al enviar correo:", error);
