@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
     // 3. Diseño del Correo (HTML)
     const mailOptions = {
         from: 'Aminovita Web <contacto@aminovitaquimicos.com.mx>',
-        to: 'sistemas@aminovitaquimicos.com.mx',
+        to: 'direccion@aminovitaquimicos.com.mx',
         reply_to: email,
         subject: `📢 Nuevo Mensaje de: ${nombre}`,
         html: `
