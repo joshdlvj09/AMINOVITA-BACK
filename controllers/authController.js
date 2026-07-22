@@ -10,18 +10,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
-// Helper para crear un transporte SMTP compatible con Render y Local
+// Helper para crear transporte SMTP forzado a STARTTLS (Evita ETIMEDOUT en Render)
 const crearTransporter = () => {
     return nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.EMAIL_PORT) || 587,
-        secure: process.env.EMAIL_SECURE === 'true' ? true : false,
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // Forzado a STARTTLS
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
         },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000
+        tls: {
+            rejectUnauthorized: false // Evita bloqueos por certificados en la red de Render
+        },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000
     });
 };
 
