@@ -6,18 +6,24 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Ruta: POST /api/contacto
 router.post('/', async (req, res) => {
-    // 👇 1. AQUI AGREGAMOS 'telefono'
-    const { nombre, email, telefono, empresa, mensaje } = req.body;
+    const { nombre, email, telefono, empresa, mensaje, destinatarioId } = req.body;
 
-    // 2. Validar datos (No validamos teléfono porque es opcional)
     if (!nombre || !email || !mensaje) {
         return res.status(400).json({ msg: "Por favor completa todos los campos obligatorios." });
     }
 
-    // 3. Diseño del Correo (HTML)
+    // Mapeo de IDs del frontend hacia los correos correspondientes
+    const CONTACTOS_VALIDOS = {
+        contacto1: 'ventas1@aminovitaquimicos.com.mx',
+        contacto2: 'direccion@aminovitaquimicos.com.mx',
+        contacto3: 'ventas3@aminovitaquimicos.com.mx'
+    };
+
+    const correoDestino = CONTACTOS_VALIDOS[destinatarioId] || 'direccion@aminovitaquimicos.com.mx';
+
     const mailOptions = {
         from: 'Aminovita Web <contacto@aminovitaquimicos.com.mx>',
-        to: 'direccion@aminovitaquimicos.com.mx',
+        to: correoDestino,
         reply_to: email,
         subject: `📢 Nuevo Mensaje de: ${nombre}`,
         html: `
@@ -47,10 +53,9 @@ router.post('/', async (req, res) => {
         `
     };
 
-    // 5. Enviar el correo
     try {
         await resend.emails.send(mailOptions);
-        console.log("✅ Correo enviado con éxito");
+        console.log("✅ Correo enviado con éxito a:", correoDestino);
         res.json({ msg: "Mensaje enviado correctamente" });
     } catch (error) {
         console.error("❌ Error al enviar correo:", error);
