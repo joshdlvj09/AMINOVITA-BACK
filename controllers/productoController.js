@@ -31,6 +31,7 @@ exports.obtenerProductos = async (req, res) => {
         }
 
         const productos = await Producto.find(query)
+            .collation({ locale: 'es', strength: 2, alternate: 'shifted' }) // Orden alfabético real: ignora mayúsculas/minúsculas y espacios sobrantes
             .sort({ titulo: 1 }) // Orden alfabético (A-Z)
             .skip((pagina - 1) * limite)
             .limit(limite);
